@@ -288,7 +288,7 @@ handle_frame(#frame{fin=1, opcode=Opcode, data=Data},  _State)
 	%% handle all known control opcodes:
 	case Opcode of
 		?OP_PING ->
-			{send, send_format(Data, ?OP_PONG)};
+			{send, send(Data, ?OP_PONG)};
 		?OP_CLOSE ->
 			%% websocket close requested
 			websocket_close;

@@ -7,7 +7,7 @@
 %%% @end
 %%% Licensed under the MIT license - http://www.opensource.org/licenses/mit-license
 %%% Created Oct 18, 2013 by Alex Robson
--module(websocket_middleware).
+-module(elli_websocket).
 -behaviour(elli_handler).
 -export([handle/2, handle_event/3]).
 
@@ -18,9 +18,9 @@
 handle(Req, Config) ->
 	Path = elli_request:raw_path(Req),
 	Verb = elli_request:verb(Req),
-	CorrectPath = proplists:get_value(path, Config),
+	CorrectPath = get_path(Config),
 	WebSocket = proplists:get_value(websocket, Config),
-	case {Verb, Path} ->
+	case {Verb, Path} of
 		{'GET', CorrectPath} ->
 			{upgrade, fun(Headers, Body, Socket) ->
 				shake(Headers, Body, Socket, WebSocket)
@@ -57,7 +57,6 @@ socket_loop(SocketId, Socket, Module, WebSocket) ->
 			gen_tcp:send(Socket,Module:send_format(Data)),
 			socket_loop(SocketId, Socket, Module, WebSocket);
 		{tcp,Socket,Data} ->
-			Pid = self(),
 			case Module:handle_data(Data) of
 				{send, Message} -> gen_tcp:send(Socket, Message);
 				Result -> WebSocket:handle_message(SocketId, Result)
@@ -71,5 +70,5 @@ socket_loop(SocketId, Socket, Module, WebSocket) ->
 			ok;
 		{websocket_close, Signal} ->
 			WebSocket:handle_close(SocketId, closed),
-			gen_tcp:send(Socket, Signal),
-			end.
+			gen_tcp:send(Socket, Signal)
+	end.
