@@ -27,7 +27,7 @@ init([]) ->
 	FileserveConfig = [{prefix, <<"/public">>},
 					   {path, <<"./public">>}],
 
-	WSConfig = [{path, <<"websocket">>},
+	WSConfig = [{path, <<"/websocket">>},
 				{websocket, my_websocket_behavior}],
 
 	MWConfig = [{mods, [

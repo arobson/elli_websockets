@@ -17,7 +17,7 @@
 
 handle(Req, Config) ->
 	Path = elli_request:raw_path(Req),
-	Verb = elli_request:verb(Req),
+	Verb = elli_request:method(Req),
 	CorrectPath = get_path(Config),
 	WebSocket = proplists:get_value(websocket, Config),
 	case {Verb, Path} of
@@ -36,7 +36,7 @@ handle_event(_,_,_) -> ok.
 %%  Sockety Bits
 %% ==================================================================
 get_path(Config) ->
-	proplists:get_value(path, Config, <<"websocket">>).
+	proplists:get_value(path, Config, <<"/websocket">>).
 
 %% perform the handshake, get the Id from the registered callback module
 %% spawn a loop just for getting incoming messages and handling the socket
