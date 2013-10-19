@@ -12,7 +12,7 @@
 -export([handle/2, handle_event/3]).
 
 %% ==================================================================
-%%  API
+%%  elli_handler
 %% ==================================================================
 
 handle(Req, Config) ->
@@ -31,7 +31,6 @@ handle(Req, Config) ->
 %% this is just here to keep the Elli happy.
 handle_event(_,_,_) -> ok.
 
-
 %% ==================================================================
 %%  Sockety Bits
 %% ==================================================================
@@ -47,6 +46,7 @@ shake(Headers, _, Socket, WebSocket) ->
 	SocketId = WebSocket:handle_client(Headers),
 	Pid = spawn(fun() -> socket_loop(SocketId, Socket, Module, WebSocket) end),
 	gen_tcp:controlling_process(Socket, Pid),
+	WebSocket:handle_ready(SocketId, fun(Message) -> Pid ! {send, Message} end),
 	Pid.
 
 %% socket loooooooooooooooop!

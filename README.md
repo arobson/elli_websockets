@@ -53,16 +53,22 @@ This is a silly behavior implementation. I suggest maybe making this also implem
 %%% the saddest websocket behavior that ever was...
 -module(my_websocket).
 -behavior(websocket).
--export([handle_client/2, handle_message/2, handle_close/1]).
+-export([handle_client/2, handle_close/1, handle_message/2, handle_ready/2]).
 
-handle_client(Headers, SendCallback) ->
+%% exists to provide a unique socket identifier based on request headers
+handle_client(Headers) ->
 	SendCallback("Hi, new websocket client!"),
-	new_id. %% this is not a good idea...
+	new_id. %% you want this to be unique per socket
 
-handle_message(Id, Message) -> io:format("~p : ~p ~n", [Id, Message]).
-
+%% called when the socket is closed for any reason
 handle_close(Id) -> io:format("Bummer, websocket ~p is closed.~n").
 ```
+
+%% handles incoming messages
+handle_message(Id, Message) -> io:format("~p : ~p ~n", [Id, Message]).
+
+%% once the socket is ready, you get a fun/1 for sending messages to the socket
+handle_ready(Id, Send) -> Send("hello, world!").
 
 ## Install
 Add the following to your rebar.config in the {deps,[]} collection:

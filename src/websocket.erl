@@ -8,6 +8,7 @@
 %%% Created Oct 19, 2013 by Alex Robson
 -module(websocket).
 
--callback handle_client(Headers :: [tuple()], SendMessage :: fun((term(),term()) -> ok)) -> term().
--callback handle_message(SocketId :: term(), Message :: list()) -> ok.
+-callback handle_client(Headers :: [tuple()]) -> term().
 -callback handle_close(SocketId :: term()) -> ok.
+-callback handle_message(SocketId :: term(), Message :: list()) -> ok.
+-callback handle_ready(SocketId :: term(), SendMessage :: fun( (term()) -> ok) ) -> ok.
