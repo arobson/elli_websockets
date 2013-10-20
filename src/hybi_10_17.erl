@@ -22,7 +22,7 @@
 
 -module(hybi_10_17).
 
--export([handshake/1, handle_data/1, send/1]).
+-export([handshake/1, handle_data/1, format_data/1]).
 
 -record(state, {
 	buffer	= <<>>,
@@ -80,10 +80,9 @@ handle_data(Data, State = #state{buffer = Buffer}) when is_binary(Data) ->
 	i_handle_data(State#state{buffer = <<Buffer/binary, Data/binary>>}).
 
 %% Description: Callback to format data before it is sent into the socket.
-send(Data) ->
-	send(Data, ?OP_TEXT).
-send(Data, OpCode) ->
-	BData = erlang:iolist_to_binary(Data),
+format_data(Data) ->
+	format_data(Data, ?OP_TEXT).
+format_data(BData, OpCode) when is_binary(BData)->
 	Len = erlang:size(BData),
 	if
 		Len < 126 ->
@@ -92,7 +91,10 @@ send(Data, OpCode) ->
 			<<1:1, 0:3, OpCode:4, 0:1, 126:7, Len:16, BData/binary>>;
 		true ->
 			<<1:1, 0:3, OpCode:4, 0:1, 127:7, 0:1, Len:63, BData/binary>>
-	end.
+	end;
+format_data(Data, OpCode) ->
+	BData = erlang:iolist_to_binary(Data),
+	format_data(BData, OpCode).
 
 %% ==================================================================
 %% Client Frame Protocol
@@ -291,7 +293,7 @@ handle_frame(#frame{fin=1, opcode=Opcode, data=Data},  _State)
 	%% handle all known control opcodes:
 	case Opcode of
 		?OP_PING ->
-			{send, send(Data, ?OP_PONG)};
+			{send, format_data(Data, ?OP_PONG)};
 		?OP_CLOSE ->
 			%% websocket close requested
 			websocket_close;

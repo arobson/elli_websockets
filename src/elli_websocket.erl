@@ -54,20 +54,19 @@ socket_loop(SocketId, Socket, Module, WebSocket) ->
 	inet:setopts(Socket,[{active,once}]),
 	receive
 		{send, Data} ->
-			gen_tcp:send(Socket,Module:send_format(Data)),
+			gen_tcp:send(Socket,Module:format_data(Data)),
 			socket_loop(SocketId, Socket, Module, WebSocket);
 		{tcp,Socket,Data} ->
 			case Module:handle_data(Data) of
 				{send, Message} -> gen_tcp:send(Socket, Message);
+				websocket_close ->
+					WebSocket:handle_close(SocketId, client_signal),
+					gen_tcp:close(Socket);
 				Result -> WebSocket:handle_message(SocketId, Result)
 			end,
 			socket_loop(SocketId, Socket, Module, WebSocket);
 		{tcp_closed,Socket} -> 
 			WebSocket:handle_close(SocketId, socket_closed),
-			gen_tcp:close(Socket),
-			ok;
-		websocket_close ->
-			WebSocket:handle_close(SocketId, client_signal),
 			gen_tcp:close(Socket),
 			ok;
 		{websocket_close, Signal} ->
