@@ -205,7 +205,7 @@ i_handle_data(#state{buffer=ToParse} = State) ->
 		{error, max_size_reached} ->
 			%% faild to find frame within data limit
 			{websocket_close, websocket_close_data()};
-		{undefined, [_, <<0,0,0,0>>, []} ->
+		{undefined, [_, <<0,0,0,0>>, []]} ->
 			%% client is failing to mask data, this is a protocol violation :@
 			{websocket_close, websocket_close_data()};
 		{undefined, Rest} ->
