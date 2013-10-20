@@ -63,12 +63,15 @@ socket_loop(SocketId, Socket, Module, WebSocket) ->
 			end,
 			socket_loop(SocketId, Socket, Module, WebSocket);
 		{tcp_closed,Socket} -> 
-			WebSocket:handle_close(SocketId, disconnected),
+			WebSocket:handle_close(SocketId, socket_closed),
+			gen_tcp:close(Socket),
 			ok;
 		websocket_close ->
-			WebSocket:handle_close(SocketId, closed),
+			WebSocket:handle_close(SocketId, client_signal),
+			gen_tcp:close(Socket),
 			ok;
 		{websocket_close, Signal} ->
-			WebSocket:handle_close(SocketId, closed),
-			gen_tcp:send(Socket, Signal)
+			WebSocket:handle_close(SocketId, protocol_error),
+			gen_tcp:send(Socket, Signal),
+			gen_tcp:close(Socket)
 	end.

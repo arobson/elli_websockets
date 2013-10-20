@@ -61,14 +61,16 @@ handle_client(Headers) ->
 	new_id. %% you want this to be unique per socket
 
 %% called when the socket is closed for any reason
-handle_close(Id) -> io:format("Bummer, websocket ~p is closed.~n").
-```
+%% Reason :: socket_closed | client_signal | protocol_error
+handle_close(Id, Reason) -> io:format("Websocket ~p closed. Reason: ~p.~n", [Id, Reason]).
 
 %% handles incoming messages
 handle_message(Id, Message) -> io:format("~p : ~p ~n", [Id, Message]).
 
 %% once the socket is ready, you get a fun/1 for sending messages to the socket
 handle_ready(Id, Send) -> Send("hello, world!").
+```
+
 
 ## Install
 Add the following to your rebar.config in the {deps,[]} collection:

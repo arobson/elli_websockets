@@ -9,6 +9,6 @@
 -module(websocket).
 
 -callback handle_client(Headers :: [tuple()]) -> term().
--callback handle_close(SocketId :: term()) -> ok.
+-callback handle_close(SocketId :: term(), Reason :: socket_closed | client_signal | protocol_error) -> ok.
 -callback handle_message(SocketId :: term(), Message :: list()) -> ok.
 -callback handle_ready(SocketId :: term(), SendMessage :: fun( (term()) -> ok) ) -> ok.
