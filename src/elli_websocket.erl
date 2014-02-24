@@ -10,23 +10,26 @@
 -module(elli_websocket).
 -behaviour(elli_handler).
 -export([handle/2, handle_event/3]).
+-include_lib("elli/include/elli.hrl").
 
 %% ==================================================================
 %%  elli_handler
 %% ==================================================================
 
-handle(Req, Config) ->
+init(Req, Config) ->
 	Path = elli_request:raw_path(Req),
 	Verb = elli_request:method(Req),
 	CorrectPath = get_path(Config),
-	WebSocket = proplists:get_value(websocket, Config),
 	case {Verb, Path} of
-		{'GET', CorrectPath} ->
-			{upgrade, fun(Headers, Body, Socket) ->
-				shake(Headers, Body, Socket, WebSocket)
-			end};
+		{'GET', CorrectPath} -> {ok, handover};
 		_ -> ignore
 	end.
+
+handle(Req, Config) ->
+	WebSocket = proplists:get_value(websocket, Config),
+	Headers = elli_request:headers(Req),
+	Socket = Req#req.socket,
+	shake(Headers, Socket, WebSocket).
 
 %% this is just here to keep the Elli happy.
 handle_event(_,_,_) -> ok.
@@ -39,7 +42,7 @@ get_path(Config) ->
 
 %% perform the handshake, get the Id from the registered callback module
 %% spawn a loop just for getting incoming messages and handling the socket
-shake(Headers, _, Socket, WebSocket) ->
+shake(Headers, Socket, WebSocket) ->
 	Module = hybi_10_17,
 	gen_tcp:send(Socket, Module:handshake(Headers)),
 	inet:setopts(Socket,[{packet,0}]),

@@ -1,11 +1,11 @@
 {application, elli_websockets,
  [
   {description, "web socket middleware for elli!"},
-  {vsn, "0.0.1"},
+  {vsn, "0.1.0"},
   {registered, []},
   {applications, [
-                  kernel,
-                  stdlib
-                 ]},
+				  kernel,
+				  stdlib
+				 ]},
   {env, []}
  ]}.
